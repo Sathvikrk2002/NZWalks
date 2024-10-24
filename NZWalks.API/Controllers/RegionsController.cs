@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
+using NZWalks.API.Models.DTO;
 
 namespace NZWalks.API.Controllers
 {
@@ -22,22 +23,71 @@ namespace NZWalks.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Region[]))]
         public IActionResult GetAllRegions()
         {
-            var regions = nZWalksDbContext.Region.ToList();
-            return Ok(regions);
+            var regionsDomain = nZWalksDbContext.Region.ToList();
+            var regionsDto = new List<RegionDto>();
+            foreach (var region in regionsDomain)
+            {
+                regionsDto.Add(new RegionDto()
+                {
+                    Code = region.Code,
+                    Id = region.Id,
+                    Name = region.Name,
+                    RegionImageUrl = region.RegionImageUrl,
+                });
+            }
+
+            return Ok(regionsDto);
         }
 
         // GET: ALL REGION BY ID
         // GET: https://localhost:portnumber/api/regions/08dd2694-27f9-4997-b8bc-5020631574c0
         [HttpGet]
         [Route("{id:Guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Region[]))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetRegionById([FromRoute] Guid id)
         {
-            var region = nZWalksDbContext.Region.FirstOrDefault(x => x.Id == id);
-            if (region == null)
+            var regionDomain = nZWalksDbContext.Region.FirstOrDefault(x => x.Id == id);
+            if (regionDomain == null)
             {
                 return NotFound();
             }
-            return Ok(region);
+            var regionDto = new RegionDto()
+            {
+                Code = regionDomain.Code,
+                Id = regionDomain.Id,
+                Name = regionDomain.Name,
+                RegionImageUrl = regionDomain.RegionImageUrl,
+            };
+
+            return Ok(regionDto);
+        }
+
+        // POST: POST NEW REGION
+        // POST: https://localhost:portnumber/api/regions
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created,Type = typeof(Region))]
+        public IActionResult CreateRegion([FromBody] AddRegionRequestDto addRegionRequestDto)
+        {
+            var regionDomainModel = new Region
+            {
+                Code = addRegionRequestDto.Code,
+                Name = addRegionRequestDto.Name,
+                RegionImageUrl = addRegionRequestDto.RegionImageUrl
+            };
+
+            nZWalksDbContext.Add(regionDomainModel);
+            nZWalksDbContext.SaveChanges();
+
+            var regionDto = new RegionDto
+            {
+                RegionImageUrl = regionDomainModel.RegionImageUrl,
+                Id = regionDomainModel.Id,
+                Name = regionDomainModel.Name,
+                Code = regionDomainModel.Code,
+            };
+
+            return CreatedAtAction(nameof(GetRegionById), new { id = regionDto.Id }, regionDto);
         }
 
     }
