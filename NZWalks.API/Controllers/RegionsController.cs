@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
+using NZWalks.API.Repositories;
 
 namespace NZWalks.API.Controllers
 {
@@ -11,19 +13,19 @@ namespace NZWalks.API.Controllers
     [ApiController]
     public class RegionsController : ControllerBase
     {
-        private readonly NZWalksDbContext nZWalksDbContext;
-        public RegionsController(NZWalksDbContext dbContext)
+        private readonly IRegionRepository repository;
+        public RegionsController(IRegionRepository repository)
         {
-            this.nZWalksDbContext = dbContext;
+            this.repository = repository;
         }
 
         // GET: ALL REGIONS
         // GET: https://localhost:portnumber/api/regions
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Region[]))]
-        public IActionResult GetAllRegions()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegionDto[]))]
+        public async Task<IActionResult> GetAllRegions()
         {
-            var regionsDomain = nZWalksDbContext.Region.ToList();
+            var regionsDomain = await repository.GetAllRegionsAsync();
             var regionsDto = new List<RegionDto>();
             foreach (var region in regionsDomain)
             {
@@ -43,11 +45,11 @@ namespace NZWalks.API.Controllers
         // GET: https://localhost:portnumber/api/regions/08dd2694-27f9-4997-b8bc-5020631574c0
         [HttpGet]
         [Route("{id:Guid}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Region[]))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegionDto[]))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetRegionById([FromRoute] Guid id)
+        public async Task<IActionResult> GetRegionById([FromRoute] Guid id)
         {
-            var regionDomain = nZWalksDbContext.Region.FirstOrDefault(x => x.Id == id);
+            var regionDomain = await repository.GetRegionByIdAsync(id);
             if (regionDomain == null)
             {
                 return NotFound();
@@ -66,8 +68,8 @@ namespace NZWalks.API.Controllers
         // POST: POST NEW REGION
         // POST: https://localhost:portnumber/api/regions
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created,Type = typeof(Region))]
-        public IActionResult CreateRegion([FromBody] AddRegionRequestDto addRegionRequestDto)
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(RegionDto))]
+        public async Task<IActionResult> CreateRegion([FromBody] AddRegionRequestDto addRegionRequestDto)
         {
             var regionDomainModel = new Region
             {
@@ -76,8 +78,7 @@ namespace NZWalks.API.Controllers
                 RegionImageUrl = addRegionRequestDto.RegionImageUrl
             };
 
-            nZWalksDbContext.Add(regionDomainModel);
-            nZWalksDbContext.SaveChanges();
+            await repository.CreateRegionAsync(regionDomainModel);
 
             var regionDto = new RegionDto
             {
@@ -94,11 +95,18 @@ namespace NZWalks.API.Controllers
         // PUT: https://localhost:portnumber/api/regions/08dd2694-27f9-4997-b8bc-5020631574c0
         [HttpPut]
         [Route("{id:Guid}")]
-        public IActionResult UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateDto)
+        public async Task<IActionResult> UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateDto)
         {
-            var regionDomainModel = nZWalksDbContext.Region.FirstOrDefault(x => x.Id == id);
+            var regionDomainModel = new Region
+            {
+                Code = updateDto.Code,
+                Name = updateDto.Name,
+                RegionImageUrl = updateDto.RegionImageUrl,
+            };
 
-            if(regionDomainModel == null)
+            regionDomainModel = await repository.UpdateRegionAsync(id, regionDomainModel);
+
+            if (regionDomainModel == null)
             {
                 return NotFound();
             }
@@ -107,7 +115,6 @@ namespace NZWalks.API.Controllers
             regionDomainModel.Code = updateDto.Code;
             regionDomainModel.Name = updateDto.Name;
 
-            nZWalksDbContext.SaveChanges();
 
             var regionDto = new RegionDto
             {
@@ -119,6 +126,32 @@ namespace NZWalks.API.Controllers
 
             return Ok(regionDto);
 
+        }
+
+        // DELETE: DELETE REGION
+        // DELETE: https://localhost:portnumber/api/regions/08dd2694-27f9-4997-b8bc-5020631574c0
+
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegionDto[]))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteRegion([FromRoute] Guid id)
+        {
+            var regionDomainModel = await repository.DeleteRegionAsync(id);
+
+            if (regionDomainModel == null)
+            {
+                return NotFound();
+            }
+
+            var regionDto = new RegionDto
+            {
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionImageUrl = regionDomainModel.RegionImageUrl,
+                Id = regionDomainModel.Id
+            };
+            return Ok(regionDto);
         }
 
     }
