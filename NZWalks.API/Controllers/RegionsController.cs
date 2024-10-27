@@ -16,7 +16,7 @@ namespace NZWalks.API.Controllers
     {
         private readonly IRegionRepository repository;
         private readonly IMapper mapper;
-        public RegionsController(IRegionRepository repository,IMapper mapper)
+        public RegionsController(IRegionRepository repository, IMapper mapper)
         {
             this.repository = repository;
             this.mapper = mapper;
@@ -46,7 +46,7 @@ namespace NZWalks.API.Controllers
             {
                 return NotFound();
             }
-            var regionDto = mapper.Map<RegionDto>(regionDomain);    
+            var regionDto = mapper.Map<RegionDto>(regionDomain);
             return Ok(regionDto);
         }
 
@@ -56,10 +56,17 @@ namespace NZWalks.API.Controllers
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(RegionDto))]
         public async Task<IActionResult> CreateRegion([FromBody] AddRegionRequestDto addRegionRequestDto)
         {
-            var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
-            await repository.CreateRegionAsync(regionDomainModel);
-            var regionDto = mapper.Map<RegionDto>(regionDomainModel);
-            return CreatedAtAction(nameof(GetRegionById), new { id = regionDto.Id }, regionDto);
+            if (ModelState.IsValid)
+            {
+                var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
+                await repository.CreateRegionAsync(regionDomainModel);
+                var regionDto = mapper.Map<RegionDto>(regionDomainModel);
+                return CreatedAtAction(nameof(GetRegionById), new { id = regionDto.Id }, regionDto);
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
         // PUT: UPDATE REGION
