@@ -23,30 +23,30 @@ namespace NZWalks.API.Repositories
 
         public async Task<Region?> DeleteRegionAsync( Guid id)
         {
-            var regionDomainModel = await nZWalksDbContext.Region.FirstOrDefaultAsync(x => x.Id == id);
+            var regionDomainModel = await nZWalksDbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
             if (regionDomainModel == null)
             {
                 return null;
             }
-            nZWalksDbContext.Region.Remove(regionDomainModel);
+            nZWalksDbContext.Regions.Remove(regionDomainModel);
             await nZWalksDbContext.SaveChangesAsync();
             return regionDomainModel;
         }
 
         public async Task<List<Region>> GetAllRegionsAsync()
         {
-            return await nZWalksDbContext.Region.ToListAsync();
+            return await nZWalksDbContext.Regions.ToListAsync();
         }
 
         public async Task<Region?> GetRegionByIdAsync(Guid id)
         {
-            return await nZWalksDbContext.Region.FirstOrDefaultAsync(x => x.Id == id);
+            return await nZWalksDbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<Region?> UpdateRegionAsync(Guid id,  Region updateDto)
         {
-            var regionDomainModel = await nZWalksDbContext.Region.FirstOrDefaultAsync(x => x.Id == id);
+            var regionDomainModel = await nZWalksDbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
             if (regionDomainModel == null)
             {

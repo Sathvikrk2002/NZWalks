@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NZWalks.API.CustomActionFilters;
 using NZWalks.API.Models.Domain;
 using NZWalks.API.Models.DTO;
 using NZWalks.API.Repositories;
@@ -34,6 +35,7 @@ namespace NZWalks.API.Controllers
         // POST: https://localhost:portnumber/api/walks
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(WalkDto))]
+        [ValidateModel]
         public async Task<IActionResult> CreateWalk([FromBody] AddWalkDto addWalkDto)
         {
             var walkDomainModel = mapper.Map<Walk>(addWalkDto);
@@ -57,6 +59,28 @@ namespace NZWalks.API.Controllers
             }
             var walkDto = mapper.Map<WalkDto>(walkDomain);
             return Ok(walkDto);
+        }
+
+        [HttpPut]
+        [Route("{id:Guid}")]
+        [ValidateModel]
+        public async Task<IActionResult> UpdateRegion([FromRoute] Guid id, [FromBody] UpdateWalkDto updateDto)
+        {
+            var regionWalkMode = mapper.Map<Walk>(updateDto);
+            regionWalkMode = await repository.UpdateWalkAsync(id, regionWalkMode);
+            if (regionWalkMode == null)
+            {
+                return NotFound();
+            }
+            regionWalkMode.DifficultyId = updateDto.DifficultyId;
+            regionWalkMode.WalkImageUrl = updateDto.WalkImageUrl;
+            regionWalkMode.Name = updateDto.Name;
+            regionWalkMode.Description = updateDto.Description;
+            regionWalkMode.LengthInKm = updateDto.LengthInKm;
+            regionWalkMode.RegionId = updateDto.RegionId;
+            var regionDto = mapper.Map<WalkDto>(regionWalkMode);
+            return Ok(regionDto);
+
         }
     }
 }
