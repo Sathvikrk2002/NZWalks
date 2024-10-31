@@ -1,20 +1,28 @@
-name: ASP.NET Core CI
+name: Deploy to Render
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
+    - name: 'Checkout GitHub Actions'
       uses: actions/checkout@v2
-      
-    - name: Setup .NET SDK
+
+    - name: 'Set up .NET Core'
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '7.0.x'
-      
-    # Build with dotnet in the project's directory
-    - name: Build with dotnet
-      run: dotnet build --configuration Release NZWalks.API/NZWalks.API.csproj
+        dotnet-version: '7.0.x'  # Adjust to match your .NET version
+
+    - name: 'Restore Dependencies'
+      run: dotnet restore
+
+    - name: 'Build the API'
+      run: dotnet build --configuration Release --no-restore
+
+    - name: 'Publish the API'
+      run: dotnet publish -c Release -o ./publish_output
