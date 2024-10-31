@@ -17,4 +17,4 @@ jobs:
       
     # Build with dotnet in the project's directory
     - name: Build with dotnet
-      run: dotnet build --configuration Release NZWalks/NZWalks.API/NZWalks.API.csproj
+      run: dotnet build --configuration Release NZWalks.API/NZWalks.API.csproj
