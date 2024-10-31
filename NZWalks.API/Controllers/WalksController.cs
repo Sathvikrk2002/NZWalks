@@ -22,12 +22,14 @@ namespace NZWalks.API.Controllers
         }
 
         // GET: ALL WALKS
-        // GET: https://localhost:portnumber/api/walks
+        // GET: https://localhost:portnumber/api/walks?filterOn=Name&filterQuary=Track
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WalkDto[]))]
-        public async Task<IActionResult> GetAllWalks()
+        public async Task<IActionResult> GetAllWalks([FromQuery] string? filterOn, [FromQuery] string? filterQuary,
+            [FromQuery] string? sortBy, [FromQuery] bool? isAssending,
+            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 100)
         {
-            var walksDomain = await repository.GetAllWalksAsync();
+            var walksDomain = await repository.GetAllWalksAsync(filterOn, filterQuary, sortBy, isAssending ?? true,pageNumber,pageSize);
             return Ok(mapper.Map<List<WalkDto>>(walksDomain));
         }
 
