@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.API.CustomActionFilters;
@@ -24,6 +25,7 @@ namespace NZWalks.API.Controllers
         // GET: ALL WALKS
         // GET: https://localhost:portnumber/api/walks?filterOn=Name&filterQuary=Track
         [HttpGet]
+        [Authorize(Roles = "Reader")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WalkDto[]))]
         public async Task<IActionResult> GetAllWalks([FromQuery] string? filterOn, [FromQuery] string? filterQuary,
             [FromQuery] string? sortBy, [FromQuery] bool? isAssending,
@@ -36,6 +38,7 @@ namespace NZWalks.API.Controllers
         // POST: POST NEW WALK
         // POST: https://localhost:portnumber/api/walks
         [HttpPost]
+        [Authorize(Roles = "Writer")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(WalkDto))]
         [ValidateModel]
         public async Task<IActionResult> CreateWalk([FromBody] AddWalkDto addWalkDto)
@@ -49,6 +52,7 @@ namespace NZWalks.API.Controllers
         // GET: ALL Walk BY ID
         // GET: https://localhost:portnumber/api/walks/08dd2694-27f9-4997-b8bc-5020631574c0
         [HttpGet]
+        [Authorize(Roles = "Reader")]
         [Route("{id:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WalkDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -64,6 +68,7 @@ namespace NZWalks.API.Controllers
         }
 
         [HttpPut]
+        [Authorize(Roles = "Writer")]
         [Route("{id:Guid}")]
         [ValidateModel]
         public async Task<IActionResult> UpdateRegion([FromRoute] Guid id, [FromBody] UpdateWalkDto updateDto)

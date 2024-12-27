@@ -14,7 +14,6 @@ namespace NZWalks.API.Controllers
     // https://localhost:portnumber/api/regions
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class RegionsController : ControllerBase
     {
         private readonly IRegionRepository repository;
@@ -28,6 +27,7 @@ namespace NZWalks.API.Controllers
         // GET: ALL REGIONS
         // GET: https://localhost:portnumber/api/regions
         [HttpGet]
+        [Authorize(Roles = "Reader")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegionDto[]))]
         public async Task<IActionResult> GetAllRegions()
         {
@@ -39,6 +39,7 @@ namespace NZWalks.API.Controllers
         // GET: ALL REGION BY ID
         // GET: https://localhost:portnumber/api/regions/08dd2694-27f9-4997-b8bc-5020631574c0
         [HttpGet]
+        [Authorize(Roles = "Reader")]
         [Route("{id:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegionDto[]))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -56,6 +57,7 @@ namespace NZWalks.API.Controllers
         // POST: POST NEW REGION
         // POST: https://localhost:portnumber/api/regions
         [HttpPost]
+        [Authorize(Roles = "Writer")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(RegionDto))]
         [ValidateModel]
         public async Task<IActionResult> CreateRegion([FromBody] AddRegionRequestDto addRegionRequestDto)
@@ -69,6 +71,7 @@ namespace NZWalks.API.Controllers
         // PUT: UPDATE REGION
         // PUT: https://localhost:portnumber/api/regions/08dd2694-27f9-4997-b8bc-5020631574c0
         [HttpPut]
+        [Authorize(Roles = "Writer")]
         [Route("{id:Guid}")]
         [ValidateModel]
         public async Task<IActionResult> UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateDto)
@@ -91,6 +94,7 @@ namespace NZWalks.API.Controllers
         // DELETE: https://localhost:portnumber/api/regions/08dd2694-27f9-4997-b8bc-5020631574c0
 
         [HttpDelete]
+        [Authorize(Roles = "Writer")]
         [Route("{id:Guid}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegionDto[]))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
